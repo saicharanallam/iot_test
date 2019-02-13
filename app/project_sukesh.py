@@ -28,7 +28,7 @@ def main():
     camera.resolution = (800, 600) # Max resolution for a picture is (2592, 1944), for video (1920, 1080)
     img_cnt = 0 # Counter for image capture loop
     max_img_cnt = 10 # Maximum count for number of images need to be captured
-    path = "/home/pi/project_sukesh/pic_feed/pic%s.jpg" # Path where pics are saved
+    path = "/home/pi/iot_test/pic_feed/pic%s.jpg" # Path where pics are saved
 
 
     cnt = 1 # Counter for number of readings taken
