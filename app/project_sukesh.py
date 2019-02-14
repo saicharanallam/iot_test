@@ -8,7 +8,7 @@ from picamera import PiCamera, Color
 import Adafruit_DHT
 import RPi.GPIO as GPIO
 
-# Local files
+# Local file imports
 import pressure_sensor
 import I2C_LCD_driver
 
