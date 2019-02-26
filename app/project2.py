@@ -7,6 +7,7 @@ from gpiozero import LED,Buzzer
 from picamera import PiCamera, Color
 import Adafruit_DHT
 import RPi.GPIO as GPIO
+from mcp3208 import MCP3208
 
 # Local file imports
 import pressure_sensor
@@ -17,6 +18,7 @@ t1 = datetime.datetime.now()
 camera = PiCamera()
 
 
+
 def main():
     dht_pin = 23 # Pin number for DHT sensor
     audio_pin = 26 # Pin number for sound sensor
@@ -24,6 +26,7 @@ def main():
     led = LED(17) # Pin number for LED
     mylcd = I2C_LCD_driver.lcd()
     sensor = Adafruit_DHT.DHT22
+    adc_reader = MCP3208()
     camera.rotation = 90
     camera.annotate_background = Color("black")
     camera.resolution = (800, 600) # Max resolution for a picture is (2592, 1944), for video (1920, 1080)
@@ -38,6 +41,14 @@ def main():
 
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(audio_pin, GPIO.IN)
+
+    def dB_fun(sensor_reading):
+        if sensor_reading <= 95:
+            print("Sound < 70dB")
+        elif sensor_reading > 95:
+            dB_reading = (((sensor_reading - 95) // 2) * .192) + 70
+            print("Sound = {}dB".format(dB_reading))
+            
 
     def callback(self):
         print("Sound detected @ "+str(time.ctime()))
@@ -55,6 +66,13 @@ def main():
     while True:
         humidity, temperature = Adafruit_DHT.read_retry(sensor, dht_pin)
         pressure = pressure_sensor.pressure_fun() # Function call for pressure
+        buffer_reading = 0
+        for j in range(4):
+            buffer_reading += adc_reader.read(1)
+            time.sleep(0.25)
+        au_reading = buffer_reading / 4
+        dB_value = dB_fun(au_reading)
+
         if humidity is not None and temperature is not None and humidity <= 100:
             mylcd.lcd_clear()
             mylcd.lcd_display_string('Temp = {0:0.1f} C'.format(temperature), 1)
@@ -77,7 +95,7 @@ def main():
                 Process(target=beeper).start()
                 mylcd.lcd_display_string("Temp is more!!", 1)
 
-        time.sleep(3)
+        time.sleep(2)
 
 if __name__ == "__main__":
     try:
